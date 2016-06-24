@@ -1,0 +1,175 @@
+---
+- hosts: all
+  user: vagrant
+  vars_files:
+    - "./vars/defaults/vagrant.yml"
+    - "./vars/defaults/general.yml"
+    - "./vars/defaults/required.yml"
+    - "./vars/defaults/install.yml"
+    - "../merged_user_settings.yml"
+
+  pre_tasks:
+
+    - name: Check Ansible version compatibility
+      fail: msg="The minimum Ansible version required to run Vlad is 1.9.0. To upgrade run 'sudo pip install --upgrade ansible'."
+      when: ansible_version.major|int == 1 and ansible_version.minor|int < 9
+
+    # Run some tasks to de-provision the box if needed
+
+    - name: Ensure Varnish is stopped
+      service: name=varnish state=stopped
+      when: varnish_install == false
+      ignore_errors: yes
+      become: true
+
+    - name: Ensure Varnish is removed
+      apt: pkg=varnish state=absent
+      when: varnish_install == false and ansible_os_family == "Debian"
+      become: true
+
+    - name: Ensure Varnish is removed
+      yum: pkg=varnish state=absent
+      when: varnish_install == false and ansible_os_family == "RedHat"
+      become: true
+
+    # Run some pre-provisioning tests to ensure the system will function when provisioned.
+
+    - name: Check for incorrect HTTP port if not running Varnish
+      fail: msg="The web server setup you have selected will make the site inaccessable on port 80"
+      when: varnish_install == false and http_port != 80
+
+    - name: Check if Varnish & Apache ports match
+      fail: msg="The Apache and Varnish ports you have selected are the same and will conflict"
+      when: varnish_install and apache_install and varnish_http_port == http_port
+
+    - name: Check PHP version is valid
+      fail: msg="PHP version not currently supported by Vlad ({{ php_version }})"
+      when: php_version != "5.3" and php_version != "5.4" and php_version != "5.5" and php_version != "5.6"
+
+    - name: Check specified Solr package
+      fail: msg="Solr Drupal module is invalid"
+      when: drupal_solr_package != "search_api_solr" and drupal_solr_package != "apachesolr"
+
+    - name: Check MailCatcher dependencies
+      debug: msg="The 'Ruby' role will be run as it is required to install MailCatcher"
+      when: ruby_install == false and mailcatcher_install
+
+    - name: Check Adminer dependencies
+      fail: msg="The Apache, PHP and MySQL roles are required to use Adminer"
+      when: (adminer_install and apache_install == false) or (adminer_install and php_install == false) or (adminer_install and mysql_install == false)
+
+    - name: Check XHProf dependencies
+      fail: msg="The Apache, PHP and MySQL roles are required to use XHProf"
+      when: (xhprof_install and apache_install == false) or (xhprof_install and php_install == false) or (xhprof_install and mysql_install == false)
+
+    - name: Check PimpMyLog dependencies
+      fail: msg="The Apache, PHP and MySQL roles are required to use PimpMyLog"
+      when: (pimpmylog_install and apache_install == false) or (pimpmylog_install and php_install == false)
+
+    - name: Check Imagemagick dependencies
+      fail: msg="The PHP role is required to use Imagemagick"
+      when: imagemagick_install and php_install == false
+
+    - name: Check Memcached dependencies
+      fail: msg="The PHP role is required to use Memcached"
+      when: memcached_install and php_install == false
+
+    - name: Check Pantheon Import dependencies
+      fail: msg="The Pantheon CLI and MySQL roles are required to import Pantheon sites."
+      when: vlad_pantheon_import and (mysql_install == false or pantheon_cli_install == false)
+
+    - name: Check if Pantheon Import will import the database
+      fail:
+        msg: You've chosen to import your Pantheon database, but your db_import_up variable is not configured. If this was unintentional, remove the pantheon_import_include_db variable from your Vlad configuration. Otherwise, please configure it to import the "vladdb" database (valid values are ["vladdb"] or true). For more information, see https://vlad-docs.readthedocs.org/en/latest/usage/variables/#mysql
+      # Vlad is deliberately hardcoded in this condition because the
+      # Pantheon Import role does not yetallow configuration of where it saves
+      # the chosen Pantheon DB.
+      when: vlad_pantheon_import and db_import_up is not defined
+
+      # Generate variables to be used in playbooks
+
+    - name: get local IPv4 address
+      local_action: setup filter=ansible_default_ipv4
+      register: local_ipv4_address
+      always_run: yes
+
+  roles:
+
+    - role: base
+
+    - { role: ruby, tags: ["ruby"], when: "ruby_install" }
+
+    - { role: samba, tags: ["windows"], when: "is_windows" }
+
+    - { role: apache, tags: ["apache"], when: "apache_install" }
+
+    - { role: php, tags: ["php"], when: "php_install" }
+
+    - { role: pantheon_cli, tags: ["hosting_tools pantheon_cli"], when: "pantheon_cli_install" }
+
+    - { role: pantheon_import, tags: ["pantheon_import"], when: "vlad_pantheon_import" }
+
+    - { role: mysql, tags: ["mysql"], when: "mysql_install" }
+
+    - { role: composer, tags: ["composer"], when: "php_install" }
+
+    - { role: xdebug, tags: ["xdebug"], when: "php_install" }
+
+    - { role: drush, tags: ["drush"], when: "php_install" }
+
+    - { role: drush_extras, tags: ["drush_extras"], when: "php_install" }
+
+    - { role: drupal, tags: ["drupal"], when: "php_install" }
+
+    # - { role: drupal_console, tags: ["drupal_console"], when: "php_install" }
+
+    - { role: adminer, tags: ["adminer"], when: "adminer_install" }
+
+    - { role: xhprof, tags: ["xhprof"], when: "xhprof_install" }
+
+    - { role: pimpmylog, tags: ["pimpmylog"], when: "pimpmylog_install" }
+
+    - { role: varnish, tags: ["varnish"], when: "varnish_install" }
+
+    - { role: memcached, tags: ["memcached"], when: "memcached_install" }
+
+    - { role: redis, tags: ["redis"], when: "redis_install" }
+
+    - { role: sendmail, tags: ["sendmail"], when: "sendmail_install" }
+
+    - { role: tomcat, tags: ["solr", "tomcat"], when: "solr_install" }
+    - { role: solr, tags: ["solr"], when: "solr_install" }
+
+    - { role: munin, tags: ["munin"], when: "munin_install" }
+
+    - { role: mailcatcher, tags: ["mailcatcher"], when: "mailcatcher_install" }
+
+    - { role: node, tags: ["node"], when: "node_install" }
+
+    - { role: imagemagick, tags: ["imagemagick"], when: "imagemagick_install" }
+
+    - { role: bling, tags: ["bling"], when: "bling_install" }
+
+    - { role: aberdeencloud_cli, tags: ["hosting_tools aberdeen_cli"], when: "aberdeen_cli_install" }
+
+    - { role: vlad_debug, tags: ["vlad_debug"], when: "vlad_debug" }
+
+  post_tasks:
+
+    - name: get current Vlad version
+      command: cat {{ inventory_dir }}/VERSION.txt
+      delegate_to: 127.0.0.1
+      register: vlad_version
+      changed_when: False
+
+    - name: move default index.php file into docroot directory
+      template: src=templates/index.j2 dest=/var/www/site/docroot/index.php force=no
+      when: add_index_file
+
+    # Run post provisioning tests to ensure everything has been provisioned correctly.
+    - include: tests/main.yml
+      tags: test
+
+  handlers:
+
+    - include: common/handlers/main.yml

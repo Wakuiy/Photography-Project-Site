@@ -1,0 +1,33 @@
+---
+- name: install apache2 packages
+  yum: pkg={{ item }} state=installed
+  with_items:
+   - mod_ssl
+   - openssl
+  become: true
+
+- name: apache_ssl | remove default ssl setup
+  file: path=/etc/httpd/conf.d/ssl.conf state=absent
+  become: true
+  notify:
+    - restart httpd
+
+- name: apache_ssl | add vhost for ssl version of the site
+  template: src=redhat_apache_ssl_vhost.j2 dest=/etc/httpd/vhosts/{{ webserver_hostname }}_ssl.conf
+  become: true
+  notify:
+    - restart httpd
+
+- name: get iptables rules
+  shell: /sbin/iptables -L
+  register: iptablesrules
+  become: true
+  always_run: true
+  changed_when: false
+
+- name: add apache iptable rule
+  command: /sbin/iptables -I INPUT 1 -p tcp --dport 443 -j ACCEPT -m comment --comment "ssl"
+  become: true
+  when: iptablesrules.stdout.find("ssl") == -1
+  notify:
+   - save iptables

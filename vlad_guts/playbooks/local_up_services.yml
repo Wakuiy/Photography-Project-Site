@@ -1,0 +1,77 @@
+---
+- hosts: all
+  user: vagrant
+  gather_facts: true
+  vars_files:
+    - "./vars/defaults/install.yml"
+    - "../merged_user_settings.yml"
+
+  tasks:
+  - name: Ensure Varnish is running.
+    service: name=varnish state=restarted
+    become: true
+    when: varnish_install
+    ignore_errors: yes
+
+  - name: Ensure Apache is running.
+    service: name=apache2 state=restarted
+    become: true
+    when: apache_install and ansible_os_family == "Debian"
+    ignore_errors: yes
+
+  - name: Ensure Apache is running.
+    service: name=httpd state=restarted
+    become: true
+    when: apache_install and ansible_os_family == "RedHat"
+    ignore_errors: yes
+
+  - name: Ensure MySQL is running.
+    command: service mysql restart
+    become: true
+    when: mysql_install and ansible_os_family == "Debian"
+    ignore_errors: yes
+
+  - name: Ensure MySQL is running.
+    command: service mysqld restart
+    become: true
+    when: mysql_install and ansible_os_family == "RedHat"
+    ignore_errors: yes
+
+  - name: Ensure Redis is running.
+    service: name=redis-server state=restarted
+    become: true
+    when: redis_install
+    ignore_errors: yes
+
+  - name: Ensure Tomcat is running.
+    service: name=tomcat6 state=restarted
+    become: true
+    when: solr_install
+    ignore_errors: yes
+
+  - name: Ensure Munin Node is running
+    service: name=munin-node state=restarted
+    become: true
+    when: munin_install
+    ignore_errors: yes
+
+  - name: MailCatcher | kill mailcatcher
+    command: curl -s -i -v -X DELETE http://127.0.0.1:1080
+    ignore_errors: yes
+    tags: mailcatcher
+    become: true
+    when: mailcatcher_install
+
+  - name: kill mailcatcher (via pid)
+    shell: pidof ruby | xargs -r sudo kill -9
+    ignore_errors: yes
+    register: kill_mailcatcher
+    failed_when: "kill_mailcatcher.rc != 0"
+    changed_when: false
+    become: true
+
+  - name: MailCatcher | run MailCatcher with no ip address restrictions
+    command: bash -lc "mailcatcher --ip=0.0.0.0"
+    tags: mailcatcher
+    when: mailcatcher_install
+    ignore_errors: yes

@@ -1,0 +1,48 @@
+# {{ ansible_managed }}
+
+[mysqld]
+datadir="{{ mysql_install_dir }}"
+socket={{ mysql_socket }}
+user=mysql
+# Disabling symbolic-links is recommended to prevent assorted security risks
+symbolic-links=0
+port={{ mysql_port }}
+max_allowed_packet={{ mysql_max_allowed_packet }}
+
+character_set_server={{ mysql_character_set_server }}
+collation_server={{ mysql_collation_server }}
+
+{% if mysql_allow_all_hosts == true %}
+bind-address=0.0.0.0
+{% else %}
+bind-address={{ boxipaddress }}
+{% endif %}
+
+#skip-external-locking
+
+innodb_buffer_pool_size={{ innodb_buffer_pool_size }}
+{% if innodb_file_per_table == true %}
+innodb_file_per_table
+{% endif %}
+innodb_log_file_size={{ innodb_log_file_size }}
+{% if innodb_flush_log_at_trx_commit != 1 %}
+innodb_flush_log_at_trx_commit={{ innodb_flush_log_at_trx_commit }}
+{% endif %}
+{% if innodb_flush_method != 'fdatasync' %}
+innodb_flush_method={{ innodb_flush_method }}
+{% endif %}
+
+{% if skip_name_resolve == true %}
+#skip-name-resolve
+{% endif %}
+
+slow-query-log = {{ mysql_slow_query_log_status }}
+slow-query-log-file = {{ mysql_slow_query_log_location }}
+long_query_time = {{ mysqL_long_query_time }}
+{% if mysql_log_queries_not_using_indexes == true %}
+log-queries-not-using-indexes
+{% endif %}
+
+[mysqld_safe]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid

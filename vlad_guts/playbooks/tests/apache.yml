@@ -1,0 +1,27 @@
+---
+- name: test | ensure Apache is running.
+  service: name=apache2 state=restarted
+  become: true
+  when: apache_install and ansible_os_family == "Debian"
+  changed_when: false
+
+- name: test | ensure Apache is running.
+  service: name=httpd state=restarted
+  become: true
+  when: apache_install and ansible_os_family == "RedHat"
+  changed_when: false
+
+- name: test | apache is installed
+  shell: apache2 -v
+  register: apache_result
+  failed_when: "apache_result.rc != 0"
+  changed_when: false
+  when: apache_install and ansible_os_family == "Debian"
+
+- name: test | apache is installed
+  command: httpd -v
+  register: apache_result
+  failed_when: "apache_result.rc != 0"
+  changed_when: false
+  when: apache_install and ansible_os_family == "RedHat"
+  become: true

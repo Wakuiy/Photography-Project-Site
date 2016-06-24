@@ -1,0 +1,122 @@
+---
+- name: install mysql packages
+  apt: pkg={{ item }} state=installed
+  when: ansible_os_family == "Debian"
+  become: true
+  with_items: mysql_pkgs
+
+- name: install mysql packages
+  yum: pkg={{ item }} state=installed
+  when: ansible_os_family == "RedHat"
+  become: true
+  with_items: mysql_pkgs
+
+- name: make sure mysql starts
+  command: chkconfig mysqld on
+  when: ansible_os_family == "RedHat"
+  become: true
+
+# set up mysql variables
+- name: create MySQL configuration file
+  template:
+    src: "mysql.my.cnf.j2"
+    dest: "{{ mysql_config_dir }}/my.cnf"
+  become: true
+  register: mysql_conf
+  notify:
+  - restart mysql
+
+- name: remove the InnoDB log files in case InnoDB settings have been changed (1/2).
+  file:
+    path: "{{ mysql_install_dir }}/ib_logfile0"
+    state: absent
+  when: mysql_conf.changed
+  become: true
+
+- name: remove the InnoDB log files in case InnoDB settings have been changed (2/2).
+  file:
+    path: "{{ mysql_install_dir }}/ib_logfile1"
+    state: absent
+  when: mysql_conf.changed
+  become: true
+
+- name: get iptables rules
+  shell: iptables -L
+  register: iptablesrules
+  failed_when: "iptablesrules.rc != 0"
+  changed_when: false
+  always_run: yes
+  become: true
+
+- name: add mysql to iptables
+  command: iptables -A INPUT -p tcp --dport {{ mysql_port }} -j  ACCEPT  -m comment --comment "mysql"
+  become: true
+  when: iptablesrules.stdout.find("mysql") == -1
+  notify:
+   - save iptables
+
+- name: force (re)start mysql to accept new settings
+  command: service {{ mysql_service_name }} restart
+  become: true
+  changed_when: false
+
+- name: check to see if root password file is present
+  stat: path=/home/{{ user }}/.my.cnf
+  register: mysql_myconf_file
+  become: yes
+
+# MySQL database setup, this does the equivalent of mysql_secure_installation.
+- name: set the root password
+  mysql_user:
+    name: root
+    password: "{{ mysql_root_password }}"
+    host: localhost
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    check_implicit_admin: true
+    priv: "*.*:ALL,GRANT"
+  when: mysql_myconf_file.stat.exists == false
+
+- name: config for easy access as root user
+  template: src=mysql_root.my.cnf.j2 dest=/root/.my.cnf
+  when: "'{{ user }}' == 'root'"
+  become: true
+
+- name: config for easy access as root user
+  template: src=mysql_root.my.cnf.j2 dest=/home/{{ user }}/.my.cnf
+  when: "'{{ user }}' != 'root'"
+
+- name: delete anonymous MySQL server user for server_hostname
+  mysql_user: name="" host="{{ server_hostname }}" state="absent" login_user=root login_password="{{ mysql_root_password }}"
+  become: true
+
+- name: delete anonymous MySQL server user for localhost
+  mysql_user: name="" state="absent" host="{{ server_hostname }}" login_user="root" login_password="{{ mysql_root_password }}"
+
+- name: secure the MySQL root user for localhost
+  mysql_user: name="root" password="{{ mysql_root_password }}" host="localhost" login_user=root login_password="{{ mysql_root_password }}"
+
+- name: allow root remote access on 127.0.0.1
+  mysql_user: name="root" password="{{ mysql_root_password }}" priv="*.*:ALL,GRANT" host="127.0.0.1" login_user=root login_password="{{ mysql_root_password }}"
+
+- name: allow root remote access on boxipaddress
+  mysql_user: name="root" password="{{ mysql_root_password }}" priv="*.*:ALL,GRANT" host="{{ boxipaddress }}" login_user=root login_password="{{ mysql_root_password }}"
+
+- name: remove the MySQL test database
+  mysql_db: db=test state=absent login_user=root login_password={{ mysql_root_password }}
+
+# set up default database(s)
+- name: create application database(s)
+  mysql_db: name={{ item }} state=present login_password={{ mysql_root_password }} login_user=root collation=utf8_general_ci
+  with_items: dbname
+
+- name: create application database(s) user(s)
+  mysql_user: name={{ dbuser }} password={{ dbpass }} priv="{{ item[0] }}.*:ALL,GRANT" host="{{ item[1] }}" state=present login_password={{ mysql_root_password }} login_user=root append_privs=yes
+  with_nested:
+    - dbname
+    - mysql_hosts
+  changed_when: False
+
+- name: give default user access to all databases
+  mysql_user: name={{ dbuser }} password={{ dbpass }} priv="*.*:ALL,GRANT" host="{{ item }}" state=present login_password={{ mysql_root_password }} login_user=root append_privs=yes
+  with_items: mysql_hosts

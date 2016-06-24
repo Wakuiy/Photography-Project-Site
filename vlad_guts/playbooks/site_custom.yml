@@ -1,0 +1,14 @@
+---
+- hosts: all
+  user: vagrant
+  vars_files:
+    - "./vars/defaults/vagrant.yml"
+    - "./vars/defaults/general.yml"
+    - "./vars/defaults/install.yml"
+    - "../merged_user_settings.yml"
+
+  roles:
+    - { role: vlad_custom, when: "custom_provision" }
+
+  handlers:
+    - include: common/handlers/main.yml

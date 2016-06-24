@@ -1,0 +1,28 @@
+---
+# Install and configure samba server (requires ports 137, 138, 139, 445 open).
+- name: Ensure Samba-related packages are installed.
+  apt: pkg={{ item }} state=installed
+  when: ansible_os_family == "Debian"
+  with_items:
+  - samba
+
+- name: Ensure Samba-related packages are installed.
+  yum: pkg={{ item }} state=installed
+  when: ansible_os_family == "RedHat"
+  with_items:
+  - samba
+
+- name: Copy Vlad shared folders into smb-vlad.conf
+  template: dest=/etc/samba/smb-vlad.conf src=smb-vlad.j2
+  become: true
+
+- name: Include Vlad shared folders in smb.conf
+  lineinfile: dest=/etc/samba/smb.conf line="include=/etc/samba/smb-vlad.conf"
+  become: true
+  notify: restart smbd
+
+- name: Creates docroot directory
+  file:
+    path: /var/www/site/docroot
+    state: directory
+  tags: samba

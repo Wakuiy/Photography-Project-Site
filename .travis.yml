@@ -1,0 +1,34 @@
+---
+# Vlad travis testing file.
+language: python
+python: "2.7"
+
+before_install:
+  # Make sure everything's up to date.
+  - sudo apt-get update -qq
+
+install:
+
+  # Install Ansible.
+  # TODO: Keep this at 1.9.4 until the following issue is resolved:
+  # https://github.com/ansible/ansible-modules-core/issues/2473
+  - pip install ansible==1.9.4
+
+  # Install Ansible Lint
+  - pip install ansible-lint
+
+script:
+  # Force the existence of a merged_user_settings.yml file.
+  - touch vlad_guts/merged_user_settings.yml
+
+  # Download required Ansible Galaxy roles
+  - ansible-galaxy install -r vlad_guts/playbooks/requirements.yml --force
+
+  # Syntax check on all playbooks.
+  - ansible-playbook -i localhost, vlad_guts/playbooks/site.yml --syntax-check
+  - ansible-playbook -i localhost, vlad_guts/playbooks/local_halt_destroy.yml --syntax-check
+  - ansible-playbook -i localhost, vlad_guts/playbooks/local_up.yml --syntax-check
+  - ansible-playbook -i localhost, vlad_guts/playbooks/local_up_services.yml --syntax-check
+
+  # Lint Check on Ansible Playbooks
+  - ansible-lint -x resources vlad_guts/playbooks/site.yml
