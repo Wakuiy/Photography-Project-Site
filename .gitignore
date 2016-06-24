@@ -56,7 +56,6 @@ vlad_guts/vlad_settings.yml
 ansible.all
 
 # Default & common shared web root folder names
-docroot/*
 htdocs/*
 public_html/*
 www/*
