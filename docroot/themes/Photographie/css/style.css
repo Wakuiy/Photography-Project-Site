@@ -23,6 +23,10 @@ html, body {
   background-color: ;
 }
 
+ol, ul {
+  padding: 0;
+}
+
 /**
 * Navbar section
 */
@@ -101,7 +105,7 @@ html, body {
 * Category pages
 */
 .view-category-pages .view-header {
-  width: 75%;
+  width: 80%;
   margin-bottom: 25px;
   margin-left: auto;
   margin-right: auto;
@@ -119,7 +123,7 @@ html, body {
 
 .view-category-pages .view-content ul {
   display: block;
-  width: 85%;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -131,6 +135,14 @@ html, body {
 
 .view-category-pages .view-content li img {
   box-shadow: 6px 6px 20px #000;
+}
+
+.view-category-pages .view-content li img:hover {
+  transform: scale(1.1);
+}
+
+.path-categories .region-header {
+  text-align: center;
 }
 
 /**
@@ -155,16 +167,16 @@ html, body {
   flex-direction: row;
 }
 
-#block-homepagecategoryblocks .view-photo-blocks .views-row {
+#block-homepagecategoryblocks .views-row {
   padding: 15px;
 }
 
-#block-homepagecategoryblocks .view-photo-blocks .views-row img {
+#block-homepagecategoryblocks .views-row img {
   box-shadow: 6px 6px 20px #000;
   transition: all .2s ease-in-out;
 }
 
-#block-homepagecategoryblocks .view-photo-blocks .views-row img:hover {
+#block-homepagecategoryblocks .views-row img:hover {
   transform: scale(1.1);
 }
 
