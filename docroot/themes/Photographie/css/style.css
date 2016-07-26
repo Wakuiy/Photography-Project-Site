@@ -6,6 +6,16 @@ html, body {
   background-color: ;
 }
 
+body.navbar-is-fixed-top {
+  margin-top: 50px;
+}
+
+.main-container {
+  padding-left: 0;
+  padding-right: 0;
+  margin-top: -3.7em;
+}
+
 .region-content {
   min-height: 100%;
   margin-bottom: 5%;
@@ -14,10 +24,6 @@ html, body {
 .region-content:after {
   content: "";
   display: block;
-}
-
-.footer, .region-content:after {
-  height: 5%;
 }
 
 .footer {
@@ -31,6 +37,14 @@ ol, ul {
 /**
 * Navbar section
 */
+.hover-for-menu {
+  width: 100%;
+  height: 100px;
+  position: fixed;
+  top: 80px;
+  opacity: 0;
+}
+
 .navbar-default .navbar-brand {
   font-family: Arial, Helvetica, sans-serif;
   font-weight: bold;
@@ -189,4 +203,107 @@ footer.footer-fixed {
   position: fixed;
   bottom: 0;
   background-color: #fff;
+}
+
+
+/**
+* Paragraphs
+*/
+.paragraph {
+  margin-bottom: 3em;
+}
+
+.field-item {
+  display: inline-block;
+}
+
+.p-container {
+  clear: both;
+  display: block;
+  margin-bottom: 2em;
+}
+
+.p-container h2 {
+  margin-left: .6em;
+}
+
+.column {
+  margin-left: 1em;
+  margin-right: 1em;
+  padding: 0 .2em;
+}
+
+.paragraph--type--hero-section .p-container .hero-image {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.paragraph--type--hero-section .p-container .hero-image img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+.paragraph--type--two-column-section .p-container .col-1 {
+  width: 45%;
+  float: left;
+  position: absolute;
+}
+
+.paragraph--type--two-column-section .p-container .col-2 {
+  width: 45%;
+  float: right;
+}
+
+.paragraph--type--two-column-section img {
+  width: 100%;
+  margin-bottom: 1.5em;
+  box-shadow: 6px 6px 20px #000;
+  transition: all .2s ease-in-out;
+}
+
+.paragraph--type--two-column-section img:hover {
+  transform: scale(1.1);
+  box-shadow: none;
+}
+
+.paragraph--type--two-column-section .p-container {
+  width: 90%;
+  margin: 0 auto;
+}
+
+.paragraph--type--three-column-section .p-container .col-1 {
+  width: 30%;
+  float: left;
+}
+
+.paragraph--type--three-column-section .p-container .col-2 {
+  width: 30%;
+  display: inline-block;
+  position: relative;
+  right: -1.8%;
+}
+
+.paragraph--type--three-column-section .p-container .col-3 {
+  width: 30%;
+  float: right;
+}
+
+.paragraph--type--three-column-section img {
+  width: 100%;
+  margin-bottom: 1.5em;
+  box-shadow: 6px 6px 20px #000;
+  transition: all .2s ease-in-out;
+}
+
+.paragraph--type--three-column-section img:hover {
+  transform: scale(1.1);
+  box-shadow: none;
+}
+
+.paragraph--type--three-column-section .p-container {
+  width: 90%;
+  margin: 0 auto;
 }

@@ -86,8 +86,18 @@
  * );
  * @endcode
  */
- $databases = array();
-
+ $databases['default']['default'] = array (
+   'database' => 'vladdb',
+   'username' => 'vlad',
+   'password' => 'wibble',
+   'prefix' => '',
+   'host' => 'localhost',
+   'port' => '',
+   'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
+   'driver' => 'mysql',
+ );
+ $settings['install_profile'] = 'standard';
+ $config_directories['sync'] = 'sites/default/files/config_wQTbMD471o3qdVgZm3_VDwpV562vmyvBYZqb14OzMFwXCRM88cYpisVUYXaqndliphd-8XYHzA/sync';
 /**
  * Customizing database settings.
  *
@@ -714,18 +724,6 @@ $settings['container_yamls'][] = __DIR__ . '/services.yml';
  *
  * Keep this code block at the end of this file to take full effect.
  */
-# if (file_exists(__DIR__ . '/settings.local.php')) {
-#   include __DIR__ . '/settings.local.php';
-# }
-$databases['default']['default'] = array (
-  'database' => 'vladdb',
-  'username' => 'vlad',
-  'password' => 'wibble',
-  'prefix' => '',
-  'host' => 'localhost',
-  'port' => '',
-  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
-  'driver' => 'mysql',
-);
-$settings['install_profile'] = 'standard';
-$config_directories['sync'] = 'sites/default/files/config_wQTbMD471o3qdVgZm3_VDwpV562vmyvBYZqb14OzMFwXCRM88cYpisVUYXaqndliphd-8XYHzA/sync';
+if (file_exists(__DIR__ . '/settings.local.php')) {
+  include __DIR__ . '/settings.local.php';
+}

@@ -3,6 +3,7 @@ global:
     theme:
       css/style.css: {}
   js:
-    js/test.js: {}
+    js/navbar.js: {}
+    js/subnav.js: {}
   dependencies:
     - core/jquery

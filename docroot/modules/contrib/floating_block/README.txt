@@ -24,8 +24,13 @@ None.
 
 -- CONFIGURATION --
 
- Configure which htmls blocks to apply the effect to in
-  Administration > Configuration > User interface > Floating block
+ Settings and configuration page can be found in:
+  Administer > Settings > Floating Block
+
+ Configure which html elements to apply the effect to on the settings page.
+ Settings can be any valid jQuery selector.
+
+ To disable behavior on smaller browser widths set the width.
 
  Customize the menu settings in Administer  Site configuration
   Administration menu.
@@ -47,3 +52,4 @@ None.
 
 Current maintainers
  Alex Pott (alexpott) - http://drupal.org/user/157725
+ Jarkko Oksanen (jOksanen) - http://drupal.org/user/2352292
