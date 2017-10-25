@@ -1,0 +1,5 @@
+name: DUI View
+type: module
+description: DUI View of DUI.
+core: 8.x
+package: Access

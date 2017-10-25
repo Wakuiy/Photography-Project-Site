@@ -1,0 +1,15 @@
+dui_view.module_list:
+  path: '/dui-view/module-list/{hmac}'
+  defaults:
+    _controller: '\Drupal\dui_view\Controller\DuiViewController::duiViewListModules'
+    hmac: 'null'
+  requirements:
+    _custom_access: '\Drupal\dui_view\Controller\DuiViewController::access'
+
+dui_view.settings:
+  path: '/admin/config/system/dui-view'
+  defaults:
+    _form: '\Drupal\dui_view\Form\DuiViewSettingsForm'
+    _title: 'DUI View settings'
+  requirements:
+    _permission: 'administer DUI configuration'

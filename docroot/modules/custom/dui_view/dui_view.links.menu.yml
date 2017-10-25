@@ -1,0 +1,10 @@
+dui_view.admin_settings:
+  title: 'dui_view module list'
+  description: 'ewofnqwefgw.'
+  route_name: dui_view.module_list
+dui_view.admin_settings_link:
+  title: 'DUI View settings'
+  description: 'wegwe.'
+  route_name: dui_view.settings
+  parent: system.admin_config_system
+  weight: 40

@@ -1,0 +1,4 @@
+access DUI module list:
+  description: 'View module list'
+  title: 'Access module list'
+  restrict access: TRUE

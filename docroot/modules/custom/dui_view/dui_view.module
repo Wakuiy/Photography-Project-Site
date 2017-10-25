@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Contains dui_view.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function dui_view_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the dui_view module.
+    case 'help.page.dui_view':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('DUI View of DUI.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function dui_view_theme() {
+  return [
+    'dui_view' => [
+      'render element' => 'children',
+    ],
+  ];
+}

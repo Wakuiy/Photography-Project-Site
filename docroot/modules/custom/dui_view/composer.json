@@ -1,0 +1,14 @@
+{
+  "name": "drupal/dui_view",
+  "type": "drupal-module",
+  "description": "DUI View of DUI.",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/dui_view",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/dui_view",
+    "source": "http://cgit.drupalcode.org/dui_view"
+  },
+  "require": { }
+}
